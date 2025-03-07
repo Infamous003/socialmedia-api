@@ -1,9 +1,10 @@
 from pydantic import BaseModel
+from sqlmodel import SQLModel, Field
 
-class Post(BaseModel):
-    id: int
-    title: str
-    description: str
+class Post(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    title: str = Field(nullable=False)
+    description: str = Field()
 
 class PostCreate(BaseModel):
     title: str

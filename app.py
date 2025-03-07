@@ -1,7 +1,9 @@
 from fastapi import FastAPI, HTTPException, status
 from models import Post
+from database import create_db_and_tables
 
 app = FastAPI()
+create_db_and_tables()
 
 @app.get("/")
 def welcome():
@@ -28,4 +30,3 @@ def get_posts(id: int):
 def create_post(post: Post):
     POSTS.append(post)
     return {"message": "Post created successfully"}
-
