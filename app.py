@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, status
+from models import Post
 
 app = FastAPI()
 
@@ -22,3 +23,9 @@ def get_posts(id: int):
     if not post_exists:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     return post_exists
+
+@app.post("/posts")
+def create_post(post: Post):
+    POSTS.append(post)
+    return {"message": "Post created successfully"}
+
