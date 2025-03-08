@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, status
-from models import Post
-from database import create_db_and_tables
+from models import Post, PostPublic, PostCreate, PostUpdate
+from database import create_db_and_tables, engine
+from sqlmodel import Session, select
 
 app = FastAPI()
 create_db_and_tables()
@@ -9,24 +10,60 @@ create_db_and_tables()
 def welcome():
     return {"message": "Welcome to social media API!"}
 
-POSTS = [
-    {"id": 1, "title": "Shutter Island | Movie breakdown", "description": "Shutter Island is a psychological thriller by none other than the great producer Christopher Nolan..."},
-    {"id": 2, "title": "Batman 2022 Review", "description": "After over a decade of waiting, we have finally come back to Gotham..."},
-    {"id": 3, "title": "A Separation", "description": "The Iranian Oscar winning movie is about a family which is going through divorce but something unexpected happens..."},
-]
+def create_posts():
+    pass
 
 @app.get("/posts")
 def get_posts():
-    return POSTS
+    with Session(engine) as session:
+        query = select(Post)
+        posts = session.exec(query).all()
+        return posts
 
 @app.get("/posts/{id}")
-def get_posts(id: int):
-    post_exists = [post for post in POSTS if post["id"] == id]
+def get_posts(id: int) -> PostPublic:
+    with Session(engine) as session:
+        query = select(Post).where(Post.id == id)
+        post_exists = session.exec(query).one_or_none()
     if not post_exists:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     return post_exists
 
 @app.post("/posts")
-def create_post(post: Post):
-    POSTS.append(post)
-    return {"message": "Post created successfully"}
+def create_post(post: PostCreate) -> PostPublic:
+    with Session(engine) as session:
+        new_post = Post(**post.model_dump())
+        session.add(new_post)
+        session.commit()
+        session.refresh(new_post)
+        return new_post
+
+@app.delete("/posts/{id}")
+def delete_post(id: int):
+    with Session(engine) as session:
+        query = select(Post).where(Post.id == id)
+        post_exists = session.exec(query).one_or_none()
+
+        if post_exists is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+        session.delete(post_exists)
+        session.commit()
+        return {"message": "Post successfully deleted"}
+    
+@app.put("/posts/{id}")
+def update_post(id: int, post: PostUpdate):
+    with Session(engine) as session:
+        query = select(Post).where(Post.id == id)
+        post_exists = session.exec(query).one_or_none()
+
+    if post_exists is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+    if post.title:
+        post_exists.title = post.title
+    if post.description:
+        post_exists.description = post.description
+
+    session.add(post_exists)
+    session.commit()
+    session.refresh(post_exists)
+    return post_exists

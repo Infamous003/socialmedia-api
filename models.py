@@ -1,10 +1,10 @@
 from pydantic import BaseModel
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, String
 
-class Post(SQLModel):
+class Post(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    title: str = Field(nullable=False)
-    description: str = Field()
+    title: str = Field(String() ,nullable=False, min_length=5)
+    description: str = Field(String(), min_length=10)
 
 class PostCreate(BaseModel):
     title: str
@@ -15,4 +15,6 @@ class PostPublic(BaseModel):
     description: str
 
 class PostUpdate(PostCreate):
-    pass
+    title: str | None = None
+    description: str | None = None
+
