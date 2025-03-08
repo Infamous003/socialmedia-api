@@ -1,6 +1,5 @@
-from fastapi import FastAPI, APIRouter
-from database import create_db_and_tables, engine
-from sqlmodel import Session, select
+from fastapi import FastAPI
+from database import create_db_and_tables
 import posts
 
 app = FastAPI()
