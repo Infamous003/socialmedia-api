@@ -39,3 +39,6 @@ class UserUpdate(BaseModel):
     username: str | None = None
     password: str | None = None
 
+class UserLogin(BaseModel):
+    username: str | None = None
+    password: str | None = None
