@@ -24,7 +24,7 @@ class User(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     username: str = Field(String(32), nullable=False, unique=True, index=True)
     email: EmailStr = Field(String(128), nullable=False)
-    password: str = Field(nullable=False)
+    password: str = Field(String(128), nullable=False)
 
 class UserCreate(BaseModel):
     username: str
