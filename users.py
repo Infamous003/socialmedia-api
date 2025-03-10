@@ -1,15 +1,16 @@
 from fastapi import HTTPException, status, APIRouter, Depends
-from models import User, UserUpdate
+from models import User, UserUpdate, UserPublic
 from sqlmodel import Session, select
 from database import engine
 from auth import get_current_user
+from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 
 router = APIRouter(tags=["Users"])
     
-@router.put("/users/{id}")
-def update_user(id: int, user: UserUpdate):
+@router.put("/users")
+def update_user(user: UserUpdate, current_user_id: int = Depends(get_current_user)) -> UserPublic:
     with Session(engine) as session:
-        query = select(User).where(User.id == id)
+        query = select(User).where(User.id == current_user_id)
         user_exists = session.exec(query).one_or_none()
 
         if user_exists is None:
