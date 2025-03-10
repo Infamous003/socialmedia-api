@@ -1,8 +1,8 @@
-from fastapi import HTTPException, status, APIRouter
-from models import User, UserPublic, UserCreate, UserUpdate
+from fastapi import HTTPException, status, APIRouter, Depends
+from models import User, UserUpdate
 from sqlmodel import Session, select
 from database import engine
-from bcrypt import hashpw, gensalt
+from auth import get_current_user
 
 router = APIRouter(tags=["Users"])
     
@@ -23,10 +23,10 @@ def update_user(id: int, user: UserUpdate):
         session.refresh(user_exists)
         return user_exists
     
-@router.delete("/users/{id}")
-def delete_user(id: int):
+@router.delete("/users")
+def delete_user(current_user_id: int = Depends(get_current_user)):
     with Session(engine) as session:
-        query = select(User).where(User.id == id)
+        query = select(User).where(User.id == current_user_id)
         user_exists = session.exec(query).one_or_none()
 
         if user_exists is None:

@@ -12,10 +12,9 @@ from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 SECRET_KEY = "pls"
 ALGORITHM = "HS256"
 
-
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login") # for setting up password flow dependency. Tells your app to expect a token in authorization header of inc req
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
   try:
@@ -41,7 +40,7 @@ def register_user(user: UserCreate):
     session.commit()
     return {"message": "User successfully created"}
   
-    
+
 @router.post("/login")
 def login(user: OAuth2PasswordRequestForm = Depends()):
   with Session(engine) as session:
