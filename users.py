@@ -2,8 +2,9 @@ from fastapi import HTTPException, status, APIRouter
 from models import User, UserPublic, UserCreate, UserUpdate
 from sqlmodel import Session, select
 from database import engine
+from bcrypt import hashpw, gensalt
 
-router = APIRouter(tags=["Posts"])
+router = APIRouter(tags=["Users"])
 
 @router.post("/users")
 def create_user(user: UserCreate) -> UserPublic:
@@ -13,8 +14,10 @@ def create_user(user: UserCreate) -> UserPublic:
 
         if user_exists:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already exists")
+        
         new_user = User(**user.model_dump())
-
+        new_user.password = hashpw(user.password.encode("utf-8"), gensalt())
+        
         session.add(new_user)
         session.commit()
         session.refresh(new_user)
