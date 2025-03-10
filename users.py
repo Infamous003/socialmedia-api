@@ -3,7 +3,6 @@ from models import User, UserUpdate, UserPublic
 from sqlmodel import Session, select
 from database import engine
 from auth import get_current_user
-from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 
 router = APIRouter(tags=["Users"])
     
