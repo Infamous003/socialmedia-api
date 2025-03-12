@@ -23,7 +23,7 @@ def create_posts():
 
 
 @router.get("/posts")
-def get_posts():
+def get_posts() -> list[PostPublic]:
     with Session(engine) as session:
         query = select(Post)
         posts = session.exec(query).all()
@@ -62,19 +62,19 @@ def delete_post(id: int, current_user_id: int = Depends(get_current_user)):
         return {"message": "Post successfully deleted"}
     
 @router.put("/posts/{id}")
-def update_post(id: int, post: PostUpdate):
+def update_post(id: int, post: PostUpdate, current_user_id: int = Depends(get_current_user)) -> PostPublic:
     with Session(engine) as session:
-        query = select(Post).where(Post.id == id)
+        query = select(Post).where(Post.user_id == current_user_id).where(Post.id == id)
         post_exists = session.exec(query).one_or_none()
 
-    if post_exists is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
-    if post.title:
-        post_exists.title = post.title
-    if post.description:
-        post_exists.description = post.description
+        if post_exists is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+        if post.title:
+            post_exists.title = post.title
+        if post.description:
+            post_exists.description = post.description
 
-    session.add(post_exists)
-    session.commit()
-    session.refresh(post_exists)
-    return post_exists
+        session.add(post_exists)
+        session.commit()
+        session.refresh(post_exists)
+        return post_exists
