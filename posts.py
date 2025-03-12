@@ -50,9 +50,9 @@ def create_post(post: PostCreate, current_user_id: int = Depends(get_current_use
         return new_post
 
 @router.delete("/posts/{id}")
-def delete_post(id: int):
+def delete_post(id: int, current_user_id: int = Depends(get_current_user)):
     with Session(engine) as session:
-        query = select(Post).where(Post.id == id)
+        query = select(Post).where(Post.user_id == current_user_id).where(Post.id == id)
         post_exists = session.exec(query).one_or_none()
 
         if post_exists is None:
