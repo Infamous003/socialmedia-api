@@ -1,9 +1,26 @@
-from fastapi import HTTPException, status, APIRouter
+from fastapi import HTTPException, status, APIRouter, Depends
 from models import Post, PostCreate, PostPublic, PostUpdate
-from sqlmodel import Session, select
+from sqlmodel import Session, select, text
 from database import engine
+from auth import get_current_user
 
 router = APIRouter(tags=["Posts"])
+
+def create_posts():
+
+    with Session(engine) as session:
+        session.exec(text("PRAGMA foreign_keys=ON;"))
+        posts = [
+            Post(title="First Post", description="This is the first post description.", user_id=1),
+            Post(title="Learning FastAPI", description="FastAPI makes API development fast and easy.", user_id=2),
+            Post(title="Docker and Containers", description="Understanding how Docker works in DevOps.", user_id=1),
+            Post(title="SQLModel Basics", description="An introduction to SQLModel and how it works.", user_id=3),
+        ]
+
+        session.add_all(posts)
+        session.commit()
+# create_posts()
+
 
 @router.get("/posts")
 def get_posts():
@@ -22,9 +39,11 @@ def get_posts(id: int) -> PostPublic:
     return post_exists
 
 @router.post("/posts")
-def create_post(post: PostCreate) -> PostPublic:
+def create_post(post: PostCreate, current_user_id: int = Depends(get_current_user)) -> PostPublic:
     with Session(engine) as session:
-        new_post = Post(**post.model_dump())
+        print(post, "\n-----------------------")
+        
+        new_post = Post(**post.model_dump(), user_id=current_user_id)
         session.add(new_post)
         session.commit()
         session.refresh(new_post)
