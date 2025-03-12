@@ -5,6 +5,7 @@ class Post(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     title: str = Field(String() ,nullable=False, min_length=5)
     description: str = Field(String(), min_length=10)
+    user_id: int = Field(nullable=False, foreign_key="user.id")
 
 class PostCreate(BaseModel):
     title: str
