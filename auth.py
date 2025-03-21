@@ -7,10 +7,16 @@ from database import engine
 from datetime import timedelta, datetime
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
+import dotenv
+import os
 
+dotenv.load_dotenv()
 
-SECRET_KEY = "pls"
-ALGORITHM = "HS256"
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
+
+if not SECRET_KEY or not ALGORITHM:
+  raise ValueError("MIssing value for SECRET_KEY or ALGORITHM")
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
