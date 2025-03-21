@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
-from sqlmodel import SQLModel, Field, String, Relationship
+from sqlmodel import SQLModel, Field, String, Relationship, DateTime
+from datetime import datetime
 
 # USER Models
 
@@ -33,6 +34,7 @@ class Post(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     title: str = Field(String() ,nullable=False, min_length=5)
     description: str = Field(String(), min_length=10)
+    published_at: datetime = Field(default_factory=datetime.now)
     user_id: int = Field(nullable=False, foreign_key="user.id", ondelete="CASCADE")
     user: User = Relationship(back_populates="post")
 
